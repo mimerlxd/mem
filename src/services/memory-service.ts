@@ -348,16 +348,18 @@ export class MemoryService {
     if (cached) {
       return cached;
     }
+
+    const searchOptions = {
+      limit: options.limit || 10,
+      threshold: options.threshold || 0.7,
+      includeMetadata: true
+    };
     
     return this.pool.withConnection(async (connection) => {
       const client = connection.getClient();
       const vectorIndex = new VectorIndex(client, this.logger, this.config.vectorDimensions);
       
-      const results = await vectorIndex.semanticSearch(queryEmbedding, {
-        limit: options.limit || 10,
-        threshold: options.threshold || 0.7,
-        includeMetadata: true
-      });
+      const results = await vectorIndex.semanticSearch(queryEmbedding, searchOptions);
       
       // Cache results for a shorter time since they may change frequently
       this.cache.set(cacheKey, results);
@@ -373,15 +375,17 @@ export class MemoryService {
   ): Promise<SearchResult[]> {
     this.ensureInitialized();
     
+    const searchOptions = {
+      limit: options.limit || 10,
+      threshold: options.threshold || 0.7,
+      includeMetadata: true
+    };
+    
     return this.pool.withConnection(async (connection) => {
       const client = connection.getClient();
       const vectorIndex = new VectorIndex(client, this.logger, this.config.vectorDimensions);
       
-      return vectorIndex.findSimilar(table, id, {
-        limit: options.limit || 10,
-        threshold: options.threshold || 0.7,
-        includeMetadata: true
-      });
+      return vectorIndex.findSimilar(table, id, searchOptions);
     });
   }
 

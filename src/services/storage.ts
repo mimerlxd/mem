@@ -47,11 +47,11 @@ export class RuleStorage extends BaseStorage<Rule> {
     const serializedTags = this.serializeTags(rule.tags);
     const serializedMetadata = this.serializeMetadata(rule.metadata);
 
-    await this.client.execute(
-      `INSERT INTO rules (id, content, tags, tier, metadata, created_at, updated_at)
+    await this.client.execute({
+      sql: `INSERT INTO rules (id, content, tags, tier, metadata, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [rule.id, rule.content, serializedTags, rule.tier, serializedMetadata, now.toISOString(), now.toISOString()]
-    );
+      args: [rule.id, rule.content, serializedTags, rule.tier, serializedMetadata, now.toISOString(), now.toISOString()]
+    });
 
     this.logger.info({ id: rule.id }, 'Rule created');
 
