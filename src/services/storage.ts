@@ -178,11 +178,11 @@ export class ProjectDocStorage extends BaseStorage<ProjectDoc> {
     const serializedTags = this.serializeTags(doc.tags);
     const serializedMetadata = this.serializeMetadata(doc.metadata);
 
-    await this.client.execute(
-      `INSERT INTO project_docs (id, project_id, title, content, file_path, tags, metadata, created_at, updated_at)
+    await this.client.execute({
+      sql: `INSERT INTO project_docs (id, project_id, title, content, file_path, tags, metadata, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [doc.id, doc.project_id, doc.title, doc.content, doc.file_path, serializedTags, serializedMetadata, now.toISOString(), now.toISOString()]
-    );
+      args: [doc.id, doc.project_id, doc.title, doc.content, doc.file_path, serializedTags, serializedMetadata, now.toISOString(), now.toISOString()]
+    });
 
     this.logger.info({ id: doc.id, project_id: doc.project_id }, 'Project document created');
 
