@@ -145,7 +145,7 @@ export class RuleStorage extends BaseStorage<Rule> {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.client.execute('DELETE FROM rules WHERE id = ?', [id]);
+    const result = await this.client.execute({sql: 'DELETE FROM rules WHERE id = ?', args: [id]});
     const deleted = result.rowsAffected > 0;
     
     if (deleted) {
@@ -270,7 +270,7 @@ export class ProjectDocStorage extends BaseStorage<ProjectDoc> {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.client.execute('DELETE FROM project_docs WHERE id = ?', [id]);
+    const result = await this.client.execute({sql: 'DELETE FROM project_docs WHERE id = ?', args: [id]});
     const deleted = result.rowsAffected > 0;
     
     if (deleted) {
@@ -413,7 +413,7 @@ export class RefStorage extends BaseStorage<Ref> {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.client.execute('DELETE FROM refs WHERE id = ?', [id]);
+    const result = await this.client.execute({sql: 'DELETE FROM refs WHERE id = ?', args: [id]});
     const deleted = result.rowsAffected > 0;
     
     if (deleted) {
