@@ -133,10 +133,10 @@ jobs:
           sleep 10
           
           # Check if service is running
-          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp "sudo systemctl is-active memory-subsystem"
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp.tail2d448.ts.net "sudo systemctl is-active memory-subsystem"
           
           # Optional: Add application-specific health check here
-          # ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp "curl -f http://localhost:3000/health || exit 1"
+          # ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp.tail2d448.ts.net "curl -f http://localhost:3000/health || exit 1"
       
       - name: Deployment notification
         if: always()

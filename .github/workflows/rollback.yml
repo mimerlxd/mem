@@ -23,7 +23,7 @@ jobs:
       
       - name: Rollback deployment
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp.tail2d448.ts.net << 'EOF'
             # Stop current service
             sudo systemctl stop memory-subsystem || true
             
@@ -51,5 +51,5 @@ jobs:
       
       - name: Rollback notification
         run: |
-          echo "🔄 Staging environment (mcp-trail-mcp) has been rolled back"
+          echo "🔄 Staging environment (mcp-trail-mcp.tail2d448.ts.net) has been rolled back"
           echo "Database backup restored: ${{ github.event.inputs.backup_restore }}"
