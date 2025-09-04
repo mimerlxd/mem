@@ -55,7 +55,7 @@ export class VectorIndex {
       return null;
     }
 
-    const buffer = result.rows[0].embedding as Buffer;
+    const buffer = Buffer.from(result.rows[0].embedding as ArrayBuffer);
     return VectorOperations.deserializeEmbedding(buffer);
   }
 
@@ -110,7 +110,7 @@ export class VectorIndex {
       const result = await this.client.execute(query);
 
       for (const row of result.rows) {
-        const embedding = VectorOperations.deserializeEmbedding(row.embedding as Buffer);
+        const embedding = VectorOperations.deserializeEmbedding(Buffer.from(row.embedding as ArrayBuffer));
         const similarity = VectorOperations.cosineSimilarity(queryEmbedding, embedding);
 
         if (similarity >= threshold) {
@@ -176,7 +176,7 @@ export class VectorIndex {
     const type = this.getTableType(table);
 
     for (const row of result.rows) {
-      const embedding = VectorOperations.deserializeEmbedding(row.embedding as Buffer);
+      const embedding = VectorOperations.deserializeEmbedding(Buffer.from(row.embedding as ArrayBuffer));
       const similarity = VectorOperations.cosineSimilarity(queryEmbedding, embedding);
 
       if (similarity >= threshold) {

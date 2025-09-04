@@ -354,8 +354,9 @@ export class MemoryService {
       const vectorIndex = new VectorIndex(client, this.logger, this.config.vectorDimensions);
       
       const results = await vectorIndex.semanticSearch(queryEmbedding, {
-        limit: options.limit,
-        threshold: options.threshold
+        limit: options.limit || 10,
+        threshold: options.threshold || 0.7,
+        includeMetadata: true
       });
       
       // Cache results for a shorter time since they may change frequently
@@ -377,8 +378,9 @@ export class MemoryService {
       const vectorIndex = new VectorIndex(client, this.logger, this.config.vectorDimensions);
       
       return vectorIndex.findSimilar(table, id, {
-        limit: options.limit,
-        threshold: options.threshold
+        limit: options.limit || 10,
+        threshold: options.threshold || 0.7,
+        includeMetadata: true
       });
     });
   }

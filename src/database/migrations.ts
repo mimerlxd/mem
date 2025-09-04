@@ -47,10 +47,10 @@ export class MigrationRunner {
         await this.client.execute(statement);
       }
       
-      await this.client.execute(
-        'INSERT INTO schema_migrations (version, description) VALUES (?, ?)',
-        { args: [version, description] }
-      );
+      await this.client.execute({
+        sql: 'INSERT INTO schema_migrations (version, description) VALUES (?, ?)',
+        args: [version, description]
+      });
       
       await this.client.execute('COMMIT');
       
@@ -74,10 +74,10 @@ export class MigrationRunner {
         await this.client.execute(statement);
       }
       
-      await this.client.execute(
-        'DELETE FROM schema_migrations WHERE version = ?',
-        [version]
-      );
+      await this.client.execute({
+        sql: 'DELETE FROM schema_migrations WHERE version = ?',
+        args: [version]
+      });
       
       await this.client.execute('COMMIT');
       
@@ -127,10 +127,10 @@ export class MigrationRunner {
           await this.client.execute(statement);
         }
         
-        await this.client.execute(
-          'INSERT INTO schema_migrations (version, description) VALUES (?, ?)',
-          [SCHEMA_VERSION, 'Initial schema']
-        );
+        await this.client.execute({
+          sql: 'INSERT INTO schema_migrations (version, description) VALUES (?, ?)',
+          args: [SCHEMA_VERSION, 'Initial schema']
+        });
         
         await this.client.execute('COMMIT');
         

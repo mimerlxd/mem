@@ -49,6 +49,9 @@ export {
 export { initDatabase } from './scripts/init-database';
 export { runMigrations } from './scripts/migrate';
 
+import type { MemoryConfig } from './types';
+import { MemoryService } from './services/memory-service';
+
 // Create a convenience function to initialize the memory service with sensible defaults
 export function createMemoryService(overrides: Partial<MemoryConfig> = {}) {
   const defaultConfig: MemoryConfig = {
