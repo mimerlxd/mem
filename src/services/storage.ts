@@ -63,10 +63,7 @@ export class RuleStorage extends BaseStorage<Rule> {
   }
 
   async findById(id: string): Promise<Rule | null> {
-    const result = await this.client.execute(
-      'SELECT * FROM rules WHERE id = ?',
-      [id]
-    );
+    const result = await this.client.execute({sql: 'SELECT * FROM rules WHERE id = ?', args: [id]});
 
     if (result.rows.length === 0) {
       return null;
@@ -87,10 +84,7 @@ export class RuleStorage extends BaseStorage<Rule> {
   async findByTier(tier: number, options: { limit?: number; offset?: number } = {}): Promise<Rule[]> {
     const { limit = 50, offset = 0 } = options;
     
-    const result = await this.client.execute(
-      'SELECT * FROM rules WHERE tier = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?',
-      [tier, limit, offset]
-    );
+    const result = await this.client.execute({sql: 'SELECT * FROM rules WHERE tier = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?', args: [tier, limit, offset]});
 
     return result.rows.map(row => ({
       id: row.id as string,
@@ -107,12 +101,9 @@ export class RuleStorage extends BaseStorage<Rule> {
     const { limit = 50, offset = 0 } = options;
     
     const placeholders = tags.map(() => '?').join(',');
-    const result = await this.client.execute(
-      `SELECT * FROM rules WHERE id IN (
+    const result = await this.client.execute({sql: `SELECT * FROM rules WHERE id IN (
         SELECT id FROM rules WHERE ${tags.map(() => 'tags LIKE ?').join(' OR ')}
-      ) ORDER BY updated_at DESC LIMIT ? OFFSET ?`,
-      [...tags.map(tag => `%"${tag}"%`), limit, offset]
-    );
+      ) ORDER BY updated_at DESC LIMIT ? OFFSET ?`, args: [...tags.map(tag => `%"${tag}"%`), limit, offset]});
 
     return result.rows.map(row => ({
       id: row.id as string,
@@ -158,10 +149,7 @@ export class RuleStorage extends BaseStorage<Rule> {
   async list(options: { limit?: number; offset?: number } = {}): Promise<Rule[]> {
     const { limit = 50, offset = 0 } = options;
     
-    const result = await this.client.execute(
-      'SELECT * FROM rules ORDER BY updated_at DESC LIMIT ? OFFSET ?',
-      [limit, offset]
-    );
+    const result = await this.client.execute({sql: 'SELECT * FROM rules ORDER BY updated_at DESC LIMIT ? OFFSET ?', args: [limit, offset]});
 
     return result.rows.map(row => ({
       id: row.id as string,
@@ -206,10 +194,7 @@ export class ProjectDocStorage extends BaseStorage<ProjectDoc> {
   }
 
   async findById(id: string): Promise<ProjectDoc | null> {
-    const result = await this.client.execute(
-      'SELECT * FROM project_docs WHERE id = ?',
-      [id]
-    );
+    const result = await this.client.execute({sql: 'SELECT * FROM project_docs WHERE id = ?', args: [id]});
 
     if (result.rows.length === 0) {
       return null;
@@ -232,10 +217,7 @@ export class ProjectDocStorage extends BaseStorage<ProjectDoc> {
   async findByProjectId(projectId: string, options: { limit?: number; offset?: number } = {}): Promise<ProjectDoc[]> {
     const { limit = 50, offset = 0 } = options;
     
-    const result = await this.client.execute(
-      'SELECT * FROM project_docs WHERE project_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?',
-      [projectId, limit, offset]
-    );
+    const result = await this.client.execute({sql: 'SELECT * FROM project_docs WHERE project_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?', args: [projectId, limit, offset]});
 
     return result.rows.map(row => ({
       id: row.id as string,
@@ -283,10 +265,7 @@ export class ProjectDocStorage extends BaseStorage<ProjectDoc> {
   async list(options: { limit?: number; offset?: number } = {}): Promise<ProjectDoc[]> {
     const { limit = 50, offset = 0 } = options;
     
-    const result = await this.client.execute(
-      'SELECT * FROM project_docs ORDER BY updated_at DESC LIMIT ? OFFSET ?',
-      [limit, offset]
-    );
+    const result = await this.client.execute({sql: 'SELECT * FROM project_docs ORDER BY updated_at DESC LIMIT ? OFFSET ?', args: [limit, offset]});
 
     return result.rows.map(row => ({
       id: row.id as string,
@@ -332,10 +311,7 @@ export class RefStorage extends BaseStorage<Ref> {
   }
 
   async findById(id: string): Promise<Ref | null> {
-    const result = await this.client.execute(
-      'SELECT * FROM refs WHERE id = ?',
-      [id]
-    );
+    const result = await this.client.execute({sql: 'SELECT * FROM refs WHERE id = ?', args: [id]});
 
     if (result.rows.length === 0) {
       return null;
@@ -354,10 +330,7 @@ export class RefStorage extends BaseStorage<Ref> {
   }
 
   async findByName(name: string): Promise<Ref | null> {
-    const result = await this.client.execute(
-      'SELECT * FROM refs WHERE name = ?',
-      [name]
-    );
+    const result = await this.client.execute({sql: 'SELECT * FROM refs WHERE name = ?', args: [name]});
 
     if (result.rows.length === 0) {
       return null;
@@ -378,10 +351,7 @@ export class RefStorage extends BaseStorage<Ref> {
   async findByChannelId(channelId: string, options: { limit?: number; offset?: number } = {}): Promise<Ref[]> {
     const { limit = 50, offset = 0 } = options;
     
-    const result = await this.client.execute(
-      'SELECT * FROM refs WHERE channel_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?',
-      [channelId, limit, offset]
-    );
+    const result = await this.client.execute({sql: 'SELECT * FROM refs WHERE channel_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?', args: [channelId, limit, offset]});
 
     return result.rows.map(row => ({
       id: row.id as string,
@@ -426,10 +396,7 @@ export class RefStorage extends BaseStorage<Ref> {
   async list(options: { limit?: number; offset?: number } = {}): Promise<Ref[]> {
     const { limit = 50, offset = 0 } = options;
     
-    const result = await this.client.execute(
-      'SELECT * FROM refs ORDER BY updated_at DESC LIMIT ? OFFSET ?',
-      [limit, offset]
-    );
+    const result = await this.client.execute({sql: 'SELECT * FROM refs ORDER BY updated_at DESC LIMIT ? OFFSET ?', args: [limit, offset]});
 
     return result.rows.map(row => ({
       id: row.id as string,

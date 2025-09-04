@@ -1,0 +1,150 @@
+name: Deploy to Staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
+      force_deploy:
+        description: 'Force deploy even if tests fail'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Type check
+        run: npm run typecheck
+      
+      - name: Lint
+        if: "!github.event.inputs.force_deploy"
+        run: npm run lint
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Run tests
+        if: "!github.event.inputs.force_deploy"
+        run: npm test
+      
+      - name: Install Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_CLIENT_SECRET }}
+          tags: tag:ci
+      
+      - name: Prepare deployment package
+        run: |
+          # Create deployment directory
+          mkdir -p deploy-package
+          
+          # Copy necessary files
+          cp -r dist/ deploy-package/
+          cp package.json package-lock.json deploy-package/
+          cp -r src/database/migrations deploy-package/ || true
+          
+          # Create systemd service file
+          cat > deploy-package/memory-subsystem.service << 'EOF'
+          [Unit]
+          Description=Memory Subsystem Service
+          After=network.target
+          
+          [Service]
+          Type=simple
+          User=ubuntu
+          WorkingDirectory=/opt/memory-subsystem
+          ExecStart=/usr/bin/node dist/index.js
+          Restart=always
+          RestartSec=10
+          Environment=NODE_ENV=production
+          
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+      
+      - name: Deploy to staging container
+        run: |
+          # Ensure target directory exists
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp "sudo mkdir -p /opt/memory-subsystem"
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp "sudo chown ubuntu:ubuntu /opt/memory-subsystem"
+          
+          # Stop existing service
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp "sudo systemctl stop memory-subsystem || true"
+          
+          # Backup current database if it exists
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp "cp /opt/memory-subsystem/memory.db /opt/memory-subsystem/memory.db.backup || true"
+          
+          # Copy deployment package
+          rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
+            ./deploy-package/ \
+            ubuntu@mcp-trail-mcp:/opt/memory-subsystem/
+          
+          # Install dependencies and setup service
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp << 'EOF'
+            cd /opt/memory-subsystem
+            
+            # Install Node.js if not present
+            if ! command -v node &> /dev/null; then
+              curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+              sudo apt-get install -y nodejs
+            fi
+            
+            # Install production dependencies
+            npm ci --production
+            
+            # Run database initialization and migrations
+            npm run db:init || true
+            npm run db:migrate || true
+            
+            # Install and start systemd service
+            sudo cp memory-subsystem.service /etc/systemd/system/
+            sudo systemctl daemon-reload
+            sudo systemctl enable memory-subsystem
+            sudo systemctl start memory-subsystem
+            
+            # Check service status
+            sudo systemctl status memory-subsystem --no-pager
+          EOF
+      
+      - name: Health check
+        run: |
+          # Wait for service to start
+          sleep 10
+          
+          # Check if service is running
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp "sudo systemctl is-active memory-subsystem"
+          
+          # Optional: Add application-specific health check here
+          # ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp "curl -f http://localhost:3000/health || exit 1"
+      
+      - name: Deployment notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Deployment to staging (mcp-trail-mcp) completed successfully"
+            echo "Branch: ${{ github.event.inputs.branch }}"
+            echo "Commit: ${{ github.sha }}"
+          else
+            echo "❌ Deployment to staging failed"
+          fi

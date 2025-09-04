@@ -1,0 +1,55 @@
+name: Rollback Staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      backup_restore:
+        description: 'Restore database backup'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Install Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_CLIENT_SECRET }}
+          tags: tag:ci
+      
+      - name: Rollback deployment
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp << 'EOF'
+            # Stop current service
+            sudo systemctl stop memory-subsystem || true
+            
+            # Restore database backup if requested
+            if [ "${{ github.event.inputs.backup_restore }}" == "true" ]; then
+              cd /opt/memory-subsystem
+              if [ -f memory.db.backup ]; then
+                cp memory.db.backup memory.db
+                echo "Database backup restored"
+              else
+                echo "No backup found to restore"
+              fi
+            fi
+            
+            # Remove current deployment
+            sudo rm -rf /opt/memory-subsystem/*
+            
+            # Disable service
+            sudo systemctl disable memory-subsystem || true
+            sudo rm -f /etc/systemd/system/memory-subsystem.service
+            sudo systemctl daemon-reload
+            
+            echo "Rollback completed"
+          EOF
+      
+      - name: Rollback notification
+        run: |
+          echo "🔄 Staging environment (mcp-trail-mcp) has been rolled back"
+          echo "Database backup restored: ${{ github.event.inputs.backup_restore }}"

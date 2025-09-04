@@ -37,19 +37,13 @@ export class VectorIndex {
     
     const serialized = VectorOperations.serializeEmbedding(embedding);
     
-    await this.client.execute(
-      `UPDATE ${table} SET embedding = ? WHERE id = ?`,
-      [serialized, id]
-    );
+    await this.client.execute({sql: `UPDATE ${table} SET embedding = ? WHERE id = ?`, args: [serialized, id]});
     
     this.logger.debug({ table, id }, 'Embedding stored');
   }
 
   async getEmbedding(table: string, id: string): Promise<Embedding | null> {
-    const result = await this.client.execute(
-      `SELECT embedding FROM ${table} WHERE id = ? AND embedding IS NOT NULL`,
-      [id]
-    );
+    const result = await this.client.execute({sql: `SELECT embedding FROM ${table} WHERE id = ? AND embedding IS NOT NULL`, args: [id]});
 
     if (result.rows.length === 0) {
       return null;
