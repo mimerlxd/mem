@@ -126,10 +126,10 @@ export class RuleStorage extends BaseStorage<Rule> {
     const serializedTags = this.serializeTags(updatedRule.tags);
     const serializedMetadata = this.serializeMetadata(updatedRule.metadata);
 
-    await this.client.execute(
-      'UPDATE rules SET content = ?, tags = ?, tier = ?, metadata = ?, updated_at = ? WHERE id = ?',
-      [updatedRule.content, serializedTags, updatedRule.tier, serializedMetadata, updatedRule.updated_at.toISOString(), id]
-    );
+    await this.client.execute({
+      sql: 'UPDATE rules SET content = ?, tags = ?, tier = ?, metadata = ?, updated_at = ? WHERE id = ?',
+      args: [updatedRule.content, serializedTags, updatedRule.tier, serializedMetadata, updatedRule.updated_at.toISOString(), id]
+    });
 
     this.logger.info({ id }, 'Rule updated');
     return updatedRule;
