@@ -85,23 +85,23 @@ jobs:
       - name: Deploy to staging container
         run: |
           # Ensure target directory exists
-          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp "sudo mkdir -p /opt/memory-subsystem"
-          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp "sudo chown ubuntu:ubuntu /opt/memory-subsystem"
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp.tail2d448.ts.net "sudo mkdir -p /opt/memory-subsystem"
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp.tail2d448.ts.net "sudo chown ubuntu:ubuntu /opt/memory-subsystem"
           
           # Stop existing service
-          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp "sudo systemctl stop memory-subsystem || true"
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp.tail2d448.ts.net "sudo systemctl stop memory-subsystem || true"
           
           # Backup current database if it exists
-          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp "cp /opt/memory-subsystem/memory.db /opt/memory-subsystem/memory.db.backup || true"
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp.tail2d448.ts.net "cp /opt/memory-subsystem/memory.db /opt/memory-subsystem/memory.db.backup || true"
           
           # Copy deployment package
           rsync -avz --delete \
             -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
             ./deploy-package/ \
-            ubuntu@mcp-trail-mcp:/opt/memory-subsystem/
+            ubuntu@mcp-trail-mcp.tail2d448.ts.net:/opt/memory-subsystem/
           
           # Install dependencies and setup service
-          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp.tail2d448.ts.net << 'EOF'
             cd /opt/memory-subsystem
             
             # Install Node.js if not present

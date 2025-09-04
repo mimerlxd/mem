@@ -86,10 +86,10 @@ jobs:
           rsync -avz --delete \
             -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
             ./dist/ ./package.json ./package-lock.json \
-            ubuntu@mcp-trail-mcp:/opt/memory-subsystem/
+            ubuntu@mcp-trail-mcp.tail2d448.ts.net:/opt/memory-subsystem/
           
           # Install dependencies and restart service on staging
-          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@mcp-trail-mcp.tail2d448.ts.net << 'EOF'
             cd /opt/memory-subsystem
             npm ci --production
             sudo systemctl restart memory-subsystem || true
