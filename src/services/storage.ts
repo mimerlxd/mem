@@ -181,7 +181,7 @@ export class ProjectDocStorage extends BaseStorage<ProjectDoc> {
     await this.client.execute({
       sql: `INSERT INTO project_docs (id, project_id, title, content, file_path, tags, metadata, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      args: [doc.id, doc.project_id, doc.title, doc.content, doc.file_path, serializedTags, serializedMetadata, now.toISOString(), now.toISOString()]
+      args: [doc.id, doc.project_id, doc.title, doc.content, doc.file_path || null, serializedTags, serializedMetadata, now.toISOString(), now.toISOString()]
     });
 
     this.logger.info({ id: doc.id, project_id: doc.project_id }, 'Project document created');
@@ -244,7 +244,7 @@ export class ProjectDocStorage extends BaseStorage<ProjectDoc> {
 
     await this.client.execute({
       sql: 'UPDATE project_docs SET project_id = ?, title = ?, content = ?, file_path = ?, tags = ?, metadata = ?, updated_at = ? WHERE id = ?',
-      args: [updatedDoc.project_id, updatedDoc.title, updatedDoc.content, updatedDoc.file_path, serializedTags, serializedMetadata, updatedDoc.updated_at.toISOString(), id]
+      args: [updatedDoc.project_id, updatedDoc.title, updatedDoc.content, updatedDoc.file_path || null, serializedTags, serializedMetadata, updatedDoc.updated_at.toISOString(), id]
     });
 
     this.logger.info({ id }, 'Project document updated');
@@ -298,7 +298,7 @@ export class RefStorage extends BaseStorage<Ref> {
     await this.client.execute({
       sql: `INSERT INTO refs (id, name, content, channel_id, metadata, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      args: [ref.id, ref.name, ref.content, ref.channel_id, serializedMetadata, now.toISOString(), now.toISOString()]
+      args: [ref.id, ref.name, ref.content, ref.channel_id || null, serializedMetadata, now.toISOString(), now.toISOString()]
     });
 
     this.logger.info({ id: ref.id, name: ref.name }, 'Reference created');
@@ -375,7 +375,7 @@ export class RefStorage extends BaseStorage<Ref> {
 
     await this.client.execute({
       sql: 'UPDATE refs SET name = ?, content = ?, channel_id = ?, metadata = ?, updated_at = ? WHERE id = ?',
-      args: [updatedRef.name, updatedRef.content, updatedRef.channel_id, serializedMetadata, updatedRef.updated_at.toISOString(), id]
+      args: [updatedRef.name, updatedRef.content, updatedRef.channel_id || null, serializedMetadata, updatedRef.updated_at.toISOString(), id]
     });
 
     this.logger.info({ id }, 'Reference updated');

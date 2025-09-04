@@ -54,8 +54,8 @@ export const SearchResultSchema = z.object({
 export type SearchResult = z.infer<typeof SearchResultSchema>;
 
 export const QueryOptionsSchema = z.object({
-  limit: z.number().default(10),
-  threshold: z.number().default(0.7),
+  limit: z.number().optional(),
+  threshold: z.number().optional(),
   project_id: z.string().optional(),
   channel_id: z.string().optional(),
   tags: z.array(z.string()).optional(),
