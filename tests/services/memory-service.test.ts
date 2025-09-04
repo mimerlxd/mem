@@ -14,6 +14,8 @@ describe('MemoryService', () => {
     if (memoryService.isReady()) {
       await memoryService.shutdown();
     }
+    // Add a small delay to ensure connections are fully closed
+    await new Promise(resolve => setTimeout(resolve, 100));
   });
 
   describe('initialization', () => {
@@ -195,6 +197,9 @@ describe('MemoryService', () => {
     });
 
     it('should handle batch embedding storage', async () => {
+      const embedding1 = createMockRule().embedding!; // Get a valid embedding
+      const embedding2 = createMockRule().embedding!; // Get a valid embedding
+      
       const rule1 = createMockRule({ embedding: undefined });
       const rule2 = createMockRule({ embedding: undefined });
       
@@ -202,14 +207,14 @@ describe('MemoryService', () => {
       await memoryService.createRule(rule2);
 
       const embeddings = [
-        { table: 'rules', id: rule1.id, embedding: rule1.embedding || [] },
-        { table: 'rules', id: rule2.id, embedding: rule2.embedding || [] },
+        { table: 'rules', id: rule1.id, embedding: embedding1 },
+        { table: 'rules', id: rule2.id, embedding: embedding2 },
       ];
 
       await memoryService.batchStoreEmbeddings(embeddings);
 
       // Verify embeddings were stored by searching
-      const results = await memoryService.semanticSearch(rule1.embedding || [], {
+      const results = await memoryService.semanticSearch(embedding1, {
         limit: 2,
         threshold: 0.1
       });
